@@ -1,65 +1,68 @@
-# Spatial transcriptomics of Arabidopsis seedlings (Visium HD): a step-by-step reproduction
+# Arabidopsis Visium HD: follow-up analyses
 
-This project re-runs a published Visium HD analysis of *Arabidopsis thaliana* seedlings from start to
-finish in R/Seurat. It explains every step: what it does, why it is done that way, and what came out.
-It fixes the bugs in the original scripts and reports the numbers this run actually produced,
-including where they differ from the original.
+> **Spin-off of [DrSeed/arabidopsis-visium-hd](https://github.com/DrSeed/arabidopsis-visium-hd).**
+> That project reproduced a published spatial transcriptomics analysis of *Arabidopsis* seedlings
+> step by step. This project starts where it ended. It tries the four "next steps" it proposed,
+> and asks how robust its results are.
 
-**➡ Read the full notebook: [arabidopsis_analysis.md](arabidopsis_analysis.md)**
-(source: [arabidopsis_analysis.Rmd](arabidopsis_analysis.Rmd))
+```
+ashrest58-commits/arabidopsis-visium-hd-spatial-transcriptomics    original published analysis
+        │
+        ▼
+DrSeed/arabidopsis-visium-hd                                       step-by-step reproduction
+        │
+        ▼
+DrSeed/arabidopsis-visium-hd-followup   ← this repository          four follow-up analyses
+```
 
-![Tissues found by clustering, shown on the tissue section](arabidopsis_analysis_files/figure-gfm/tissues-spatial-1.png)
+The git history shows the link: the first commit here is the original project's commit, and the
+follow-up work is added on top of it.
 
-## The analysis in brief
+**➡ Read the new analyses: [follow_up_analyses.md](follow_up_analyses.md)**
+(source: [follow_up_analyses.Rmd](follow_up_analyses.Rmd))
 
-| Step | What it does | Result in this run |
-|---|---|---|
-| 3. Load | Read the 8 × 8 µm bins into Seurat | 31,109 genes × 7,356 bins |
-| 4. Quality control | Remove bins with ≤ 100 molecules or ≤ 50 genes | 17,852 genes × 1,516 bins |
-| 6. Clustering | PCA → neighbour graph → Louvain clustering | 7 clusters |
-| 7. Annotation | Name clusters from their marker genes | Cotyledon, germinating seed, root elongation zone, root, meristematic tissue, hypocotyl, SAM |
-| 8. Spatial genes | Moran's I for 3,000 variable genes | Top gene: EXT3 (I = 0.79), expressed along the whole root |
-| 9. Differential expression | Cotyledon vs germinating seed (Wilcoxon) | 331 genes tested; 50 significant with a ≥ 2-fold change (1 up in cotyledon, 49 up in germinating seed) |
-| 10. GO enrichment | ORA per tissue + GSEA | Photosynthesis (cotyledon), ribosome biogenesis (meristem), cell wall (root), phyllome development (SAM) |
-| 11. Gradients | GAM of expression vs distance from the SAM | AFO and ANT confined to the SAM region; CAB1 shows no trend |
+## What the follow-up found
 
-![GO terms enriched in each tissue](arabidopsis_analysis_files/figure-gfm/ora-plot-1.png)
+| Idea | Result |
+|---|---|
+| **16 µm bins instead of 8 µm** | About 2.5× more molecules per bin and much less dropout (the SAM marker is detected in 57% of SAM bins instead of 27%). But root and elongation zone merge, and the SAM shrinks to 7 bins. 8 µm suits this slide better. |
+| **SCTransform normalisation** | Same number of clusters. The root tissues are unchanged, but the shoot tissue borders shift and the SAM merges with the hypocotyl. |
+| **BANKSY spatial clustering** | Without spatial information it matches the original tissues (ARI 0.78). With it, clusters get smoother but follow the separate seedling pieces instead of tissue types. |
+| **GO with TAIR IDs, GSEA on all genes** | 98% of genes usable instead of 42%. Hypocotyl gains GO terms. GSEA now finds ribosome, translation and plastid processes higher in germinating seed, which the original GSEA missed. |
+| **Gradient along the root** | No piece of tissue holds the whole root axis. Within pieces, meristem genes give way to elongation-zone and root genes. An expression-based axis recovers meristem → elongation zone → root. |
 
-## What this reproduction corrects
+**What ties them together:** the root tissues and the photosynthesis signal hold up under every
+change tried. The borders between the shoot tissues (cotyledon, germinating seed, hypocotyl, SAM)
+are the least stable part of the original analysis.
 
-Everything up to clustering matches the original exactly. The later differences have reasons:
+![GO terms per tissue with genes matched by TAIR ID](follow_up_analyses_files/figure-gfm/ora-tair-plot-1.png)
 
-- **The spatially variable gene list.** The original scaled only ~35 heat-map genes, so Moran's I
-  could only test those. Here all 3,000 variable genes are tested. EXT3 is still first, but AGP31
-  drops from 2nd to 5th.
-- **"DEG" counts.** The original reports the number of genes *tested* as differentially expressed
-  genes. Here tested, significant, and significant with a two-fold change are reported separately:
-  331, 208 and 50.
-- **Tissue-specific GO cut-offs.** In the original they never took effect, because of a numbers vs
-  names mismatch. With them applied, hypocotyl has no significant GO terms. Its 5 terms in the
-  original came from just 2 genes.
-- **Gradient interpretation.** ANT is described in the original as a "modest gradient". In the
-  plots it is confined to a small domain around the SAM, like AFO.
+![The root axis reconstructed from expression](follow_up_analyses_files/figure-gfm/root-axis-plot-1.png)
 
-The notebook's *Summary* section lists every bug fixed and every problem hit while running it.
+## What is carried over from the original project
 
-## How to reproduce
+- **[arabidopsis_analysis.md](arabidopsis_analysis.md)**, the annotated main notebook, is included
+  so this repository runs on its own. It is the same as in the original project with one fix:
+  very small p-values in its tables now show their real value (for example `1e-22`) instead of
+  being rounded to `0`.
 
-1. Install a recent R (this run used R 4.6.1) and RStudio, then open `arabidopsis_visium.Rproj`.
-2. In `arabidopsis_analysis.Rmd`, run the **Step 1** chunk (installs packages) and the **Step 2**
-   chunk (downloads the 768 MB dataset from 10x Genomics) once, using the green ▶ on each chunk.
-3. Press **Knit**. The whole analysis takes about one minute.
+## How to run
 
-The raw data are not stored in this repository (see `.gitignore`). Step 2 downloads them.
+1. Open `arabidopsis-visium-hd-followup.Rproj` in RStudio.
+2. In `arabidopsis_analysis.Rmd`, run the Step 1 (packages) and Step 2 (768 MB data download)
+   chunks once, then press **Knit**. This saves `results/annotated.rds`.
+3. In `follow_up_analyses.Rmd`, run the install chunk once, then press **Knit**.
+
+Each notebook takes about one minute. The raw data are not stored in this repository.
 
 ## Files
 
 | File | Contents |
 |---|---|
-| `arabidopsis_analysis.Rmd` | The analysis notebook, with explanations |
-| `arabidopsis_analysis.md` + `arabidopsis_analysis_files/` | The knitted notebook and its figures, readable on GitHub |
-| `results/DE_cot_vs_germ.csv` | Differential expression table, cotyledon vs germinating seed |
-| `arabidopsis_visium.Rproj` | RStudio project file (sets the working directory) |
+| `follow_up_analyses.Rmd` / `.md` + `follow_up_analyses_files/` | **New:** the four follow-up analyses, with figures |
+| `arabidopsis_analysis.Rmd` / `.md` + `arabidopsis_analysis_files/` | Carried over: the main reproduction notebook |
+| `results/DE_cot_vs_germ.csv` | Differential expression table from the main notebook |
+| `arabidopsis-visium-hd-followup.Rproj` | RStudio project file |
 
 ## Credits
 
@@ -67,5 +70,5 @@ The raw data are not stored in this repository (see `.gitignore`). Step 2 downlo
   [ashrest58-commits/arabidopsis-visium-hd-spatial-transcriptomics](https://github.com/ashrest58-commits/arabidopsis-visium-hd-spatial-transcriptomics)
   (MIT licence).
 - **Data:** 10x Genomics public dataset *Visium HD 3′ Arabidopsis* (Space Ranger 4.0.1 outputs).
-- **Software:** Seurat, clusterProfiler, org.At.tair.db, enrichplot, mgcv, ggplot2. Exact versions
-  are at the end of the notebook.
+- **Methods:** Seurat (including SCTransform), BANKSY, clusterProfiler, org.At.tair.db, mgcv.
+  Exact versions are at the end of each notebook.

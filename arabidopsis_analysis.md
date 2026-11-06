@@ -93,7 +93,7 @@ so and explains why.
 
 **How to run this notebook**
 
-1.  Open `arabidopsis_visium.Rproj` in RStudio. This sets the working
+1.  Open the project’s `.Rproj` file in RStudio. This sets the working
     directory to the project folder, so the relative paths (`data/`,
     `results/`) work.
 2.  Run the chunks in **Step 1** and **Step 2** once, by clicking the
@@ -639,16 +639,17 @@ not significant:
 ``` r
 de %>% arrange(-avg_log2FC) %>% head(5) %>%
   dplyr::select(gene, avg_log2FC, pct.1, pct.2, p_val_adj) %>%
-  mutate(across(where(is.numeric), ~ signif(.x, 3))) %>% knitr::kable(row.names = FALSE)
+  mutate(across(where(is.numeric), ~ signif(.x, 3)),
+         p_val_adj = formatC(p_val_adj, format = "g", digits = 2)) %>% knitr::kable(row.names = FALSE)
 ```
 
 | gene      | avg_log2FC | pct.1 | pct.2 | p_val_adj |
-|:----------|-----------:|------:|------:|----------:|
-| CA1       |       2.50 | 0.109 | 0.041 |     0.495 |
-| GRP3S     |       2.42 | 0.152 | 0.080 |     1.000 |
-| AT2G45180 |       1.46 | 0.226 | 0.205 |     1.000 |
-| PSBQ-2    |       1.44 | 0.150 | 0.132 |     1.000 |
-| LHB1B1    |       1.44 | 0.150 | 0.134 |     1.000 |
+|:----------|-----------:|------:|------:|:----------|
+| CA1       |       2.50 | 0.109 | 0.041 | 0.49      |
+| GRP3S     |       2.42 | 0.152 | 0.080 | 1         |
+| AT2G45180 |       1.46 | 0.226 | 0.205 | 1         |
+| PSBQ-2    |       1.44 | 0.150 | 0.132 | 1         |
+| LHB1B1    |       1.44 | 0.150 | 0.134 | 1         |
 
 For example, CA1 is 5.7 times higher in cotyledon, but it is detected in
 only 11% of cotyledon bins against 4% of germinating-seed bins, and its
@@ -657,26 +658,27 @@ adjusted p is 0.5. The genes that pass both cut-offs:
 ``` r
 de %>% filter(sig != "Not significant") %>% arrange(p_val_adj) %>% head(15) %>%
   dplyr::select(gene, sig, avg_log2FC, pct.1, pct.2, p_val_adj) %>%
-  mutate(across(where(is.numeric), ~ signif(.x, 3))) %>% knitr::kable(row.names = FALSE)
+  mutate(across(where(is.numeric), ~ signif(.x, 3)),
+         p_val_adj = formatC(p_val_adj, format = "g", digits = 2)) %>% knitr::kable(row.names = FALSE)
 ```
 
 | gene      | sig                    | avg_log2FC | pct.1 | pct.2 | p_val_adj |
-|:----------|:-----------------------|-----------:|------:|------:|----------:|
-| AT3G49910 | Up in Germinating seed |      -1.69 | 0.044 | 0.307 |         0 |
-| RPL12-C   | Up in Germinating seed |      -1.27 | 0.074 | 0.316 |         0 |
-| AT5G21020 | Up in Germinating seed |      -1.09 | 0.078 | 0.323 |         0 |
-| AT3G62870 | Up in Germinating seed |      -1.60 | 0.048 | 0.257 |         0 |
-| emb2171   | Up in Germinating seed |      -1.01 | 0.093 | 0.352 |         0 |
-| AT3G60245 | Up in Germinating seed |      -1.14 | 0.060 | 0.270 |         0 |
-| PORA      | Up in Germinating seed |      -1.23 | 0.046 | 0.241 |         0 |
-| AT4G27090 | Up in Germinating seed |      -1.04 | 0.065 | 0.282 |         0 |
-| AT1G52300 | Up in Germinating seed |      -1.04 | 0.065 | 0.270 |         0 |
-| NUC-L1    | Up in Germinating seed |      -1.00 | 0.074 | 0.277 |         0 |
-| BBC1      | Up in Germinating seed |      -1.02 | 0.060 | 0.250 |         0 |
-| AT3G08520 | Up in Germinating seed |      -1.53 | 0.026 | 0.177 |         0 |
-| AT2G27720 | Up in Germinating seed |      -1.05 | 0.053 | 0.232 |         0 |
-| AT5G56710 | Up in Germinating seed |      -1.47 | 0.034 | 0.184 |         0 |
-| AT2G47780 | Up in Germinating seed |      -1.14 | 0.048 | 0.214 |         0 |
+|:----------|:-----------------------|-----------:|------:|------:|:----------|
+| AT3G49910 | Up in Germinating seed |      -1.69 | 0.044 | 0.307 | 1e-22     |
+| RPL12-C   | Up in Germinating seed |      -1.27 | 0.074 | 0.316 | 5.6e-16   |
+| AT5G21020 | Up in Germinating seed |      -1.09 | 0.078 | 0.323 | 1.3e-15   |
+| AT3G62870 | Up in Germinating seed |      -1.60 | 0.048 | 0.257 | 2.1e-15   |
+| emb2171   | Up in Germinating seed |      -1.01 | 0.093 | 0.352 | 2.7e-15   |
+| AT3G60245 | Up in Germinating seed |      -1.14 | 0.060 | 0.270 | 7.8e-14   |
+| PORA      | Up in Germinating seed |      -1.23 | 0.046 | 0.241 | 8.9e-14   |
+| AT4G27090 | Up in Germinating seed |      -1.04 | 0.065 | 0.282 | 9.8e-14   |
+| AT1G52300 | Up in Germinating seed |      -1.04 | 0.065 | 0.270 | 3.1e-12   |
+| NUC-L1    | Up in Germinating seed |      -1.00 | 0.074 | 0.277 | 2.3e-11   |
+| BBC1      | Up in Germinating seed |      -1.02 | 0.060 | 0.250 | 2.4e-11   |
+| AT3G08520 | Up in Germinating seed |      -1.53 | 0.026 | 0.177 | 3.4e-11   |
+| AT2G27720 | Up in Germinating seed |      -1.05 | 0.053 | 0.232 | 8.2e-11   |
+| AT5G56710 | Up in Germinating seed |      -1.47 | 0.034 | 0.184 | 2.9e-10   |
+| AT2G47780 | Up in Germinating seed |      -1.14 | 0.048 | 0.214 | 4.3e-10   |
 
 ``` r
 to_label <- de %>% filter(sig != "Not significant") %>% arrange(p_val_adj) %>% head(12)
@@ -793,25 +795,25 @@ annotations.
 ``` r
 as.data.frame(ora) %>% group_by(Cluster) %>% slice_min(p.adjust, n = 3, with_ties = FALSE) %>%
   dplyr::select(Cluster, Description, GeneRatio, p.adjust) %>%
-  mutate(p.adjust = signif(p.adjust, 2)) %>% knitr::kable()
+  mutate(p.adjust = formatC(p.adjust, format = "g", digits = 2)) %>% knitr::kable()
 ```
 
 | Cluster | Description | GeneRatio | p.adjust |
-|:---|:---|:---|---:|
-| Cotyledon | photosynthesis, light harvesting in photosystem I | 7/11 | 0.0e+00 |
-| Cotyledon | response to high light intensity | 2/11 | 1.7e-02 |
-| Germinating seed | translation | 6/19 | 1.2e-03 |
-| Meristematic tissue | translation | 24/121 | 0.0e+00 |
-| Meristematic tissue | ribosome biogenesis | 18/121 | 0.0e+00 |
-| Meristematic tissue | rRNA processing | 14/121 | 0.0e+00 |
+|:---|:---|:---|:---|
+| Cotyledon | photosynthesis, light harvesting in photosystem I | 7/11 | 6.7e-15 |
+| Cotyledon | response to high light intensity | 2/11 | 0.017 |
+| Germinating seed | translation | 6/19 | 0.0012 |
+| Meristematic tissue | translation | 24/121 | 2e-12 |
+| Meristematic tissue | ribosome biogenesis | 18/121 | 5.4e-12 |
+| Meristematic tissue | rRNA processing | 14/121 | 1.3e-09 |
 | Root | nucleoside phosphate metabolic process | 16/96 | 2.5e-06 |
-| Root | cell wall organization or biogenesis | 17/96 | 5.0e-05 |
-| Root | carbohydrate derivative metabolic process | 16/96 | 2.4e-04 |
+| Root | cell wall organization or biogenesis | 17/96 | 5e-05 |
+| Root | carbohydrate derivative metabolic process | 16/96 | 0.00024 |
 | Root elongation zone | translation | 17/111 | 2.3e-06 |
 | Root elongation zone | protein folding | 12/111 | 1.6e-05 |
-| Root elongation zone | protein maturation | 12/111 | 5.0e-04 |
-| SAM | phyllome development | 6/15 | 1.5e-02 |
-| SAM | cytoplasmic translation | 2/15 | 4.2e-02 |
+| Root elongation zone | protein maturation | 12/111 | 0.0005 |
+| SAM | phyllome development | 6/15 | 0.015 |
+| SAM | cytoplasmic translation | 2/15 | 0.042 |
 
 > **Why `dplyr::select` and not just `select`?** Loading clusterProfiler
 > also loads AnnotationDbi and IRanges. These packages have their own
@@ -876,17 +878,18 @@ n_gsea_raw <- nrow(gsea)
 gsea <- simplify(gsea, cutoff = 0.7)
 
 as.data.frame(gsea)[, c("Description", "setSize", "NES", "p.adjust")] %>%
-  mutate(NES = round(NES, 2), p.adjust = signif(p.adjust, 2)) %>% knitr::kable(row.names = FALSE)
+  mutate(NES = round(NES, 2), p.adjust = formatC(p.adjust, format = "g", digits = 2)) %>%
+  knitr::kable(row.names = FALSE)
 ```
 
 | Description                    | setSize |  NES | p.adjust |
-|:-------------------------------|--------:|-----:|---------:|
-| photosynthesis, light reaction |      32 | 3.54 |  0.00000 |
-| response to light stimulus     |      37 | 2.45 |  0.00018 |
-| cellular response to stress    |      18 | 2.10 |  0.00680 |
-| biological_process             |     184 | 1.62 |  0.01100 |
-| cellular process               |     176 | 1.59 |  0.04300 |
-| metabolic process              |     158 | 1.55 |  0.01500 |
+|:-------------------------------|--------:|-----:|:---------|
+| photosynthesis, light reaction |      32 | 3.54 | 6.2e-09  |
+| response to light stimulus     |      37 | 2.45 | 0.00018  |
+| cellular response to stress    |      18 | 2.10 | 0.0068   |
+| biological_process             |     184 | 1.62 | 0.011    |
+| cellular process               |     176 | 1.59 | 0.043    |
+| metabolic process              |     158 | 1.55 | 0.015    |
 
 ``` r
 dotplot(gsea, split = ".sign") + facet_grid(. ~ .sign)
@@ -1141,6 +1144,9 @@ small changes between software versions.
   matched by gene symbol.
 
 ## Ideas for next steps
+
+All four are tried in the follow-up notebook,
+[follow_up_analyses.md](follow_up_analyses.md).
 
 - Repeat the analysis with 16 µm bins (`bin.size = 16`). Are the same
   tissues found, with less noise?

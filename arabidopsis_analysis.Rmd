@@ -58,7 +58,7 @@ explains why.
 
 **How to run this notebook**
 
-1. Open `arabidopsis_visium.Rproj` in RStudio. This sets the working directory to the project
+1. Open the project's `.Rproj` file in RStudio. This sets the working directory to the project
    folder, so the relative paths (`data/`, `results/`) work.
 2. Run the chunks in **Step 1** and **Step 2** once, by clicking the green ▶ on each chunk.
    They are marked `eval = FALSE`, so pressing **Knit** does not reinstall the packages or download
@@ -457,7 +457,8 @@ detected in only a few bins, so they are not significant:
 ```{r de-top-fc}
 de %>% arrange(-avg_log2FC) %>% head(5) %>%
   dplyr::select(gene, avg_log2FC, pct.1, pct.2, p_val_adj) %>%
-  mutate(across(where(is.numeric), ~ signif(.x, 3))) %>% knitr::kable(row.names = FALSE)
+  mutate(across(where(is.numeric), ~ signif(.x, 3)),
+         p_val_adj = formatC(p_val_adj, format = "g", digits = 2)) %>% knitr::kable(row.names = FALSE)
 ```
 
 For example, CA1 is 5.7 times higher in cotyledon, but it is detected in only 11% of cotyledon bins
@@ -466,7 +467,8 @@ against 4% of germinating-seed bins, and its adjusted p is 0.5. The genes that p
 ```{r de-significant}
 de %>% filter(sig != "Not significant") %>% arrange(p_val_adj) %>% head(15) %>%
   dplyr::select(gene, sig, avg_log2FC, pct.1, pct.2, p_val_adj) %>%
-  mutate(across(where(is.numeric), ~ signif(.x, 3))) %>% knitr::kable(row.names = FALSE)
+  mutate(across(where(is.numeric), ~ signif(.x, 3)),
+         p_val_adj = formatC(p_val_adj, format = "g", digits = 2)) %>% knitr::kable(row.names = FALSE)
 ```
 
 ```{r volcano, fig.height = 6}
@@ -556,7 +558,7 @@ The numbers under each tissue are the genes that could be matched to GO annotati
 ```{r ora-table}
 as.data.frame(ora) %>% group_by(Cluster) %>% slice_min(p.adjust, n = 3, with_ties = FALSE) %>%
   dplyr::select(Cluster, Description, GeneRatio, p.adjust) %>%
-  mutate(p.adjust = signif(p.adjust, 2)) %>% knitr::kable()
+  mutate(p.adjust = formatC(p.adjust, format = "g", digits = 2)) %>% knitr::kable()
 ```
 
 > **Why `dplyr::select` and not just `select`?** Loading clusterProfiler also loads AnnotationDbi
@@ -610,7 +612,8 @@ n_gsea_raw <- nrow(gsea)
 gsea <- simplify(gsea, cutoff = 0.7)
 
 as.data.frame(gsea)[, c("Description", "setSize", "NES", "p.adjust")] %>%
-  mutate(NES = round(NES, 2), p.adjust = signif(p.adjust, 2)) %>% knitr::kable(row.names = FALSE)
+  mutate(NES = round(NES, 2), p.adjust = formatC(p.adjust, format = "g", digits = 2)) %>%
+  knitr::kable(row.names = FALSE)
 ```
 
 ```{r gsea-plot, fig.width = 8, fig.height = 5}
@@ -800,6 +803,8 @@ original scripts (explained below), and small changes between software versions.
 - **GO analysis loses genes.** Only about 42% of detected genes can be matched by gene symbol.
 
 ## Ideas for next steps
+
+All four are tried in the follow-up notebook, [follow_up_analyses.md](follow_up_analyses.md).
 
 - Repeat the analysis with 16 µm bins (`bin.size = 16`). Are the same tissues found, with less noise?
 - Try `SCTransform()` for normalisation, or BANKSY for clustering that also uses position.

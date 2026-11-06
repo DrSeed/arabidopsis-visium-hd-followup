@@ -1,12 +1,12 @@
-# Raw data (1.6 GB). Download it with the Step 2 chunk in the notebook.
-data/
+# Raw data (1.6 GB), a folder or a link to one. Download it with the Step 2 chunk of the main notebook.
+/data
 
 # Large or regenerated outputs
 results/*.rds
 results/*_log.txt
 
-# HTML preview made when knitting (GitHub shows the .md version instead)
-arabidopsis_analysis.html
+# HTML previews made when knitting (GitHub shows the .md versions instead)
+*.html
 
 # The original author's repository, cloned locally for comparison (linked in README.md)
 original_repo/
