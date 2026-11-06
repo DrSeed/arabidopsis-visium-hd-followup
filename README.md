@@ -18,6 +18,12 @@ DrSeed/arabidopsis-visium-hd-followup   ← this repository          four follow
 The git history shows the link: the first commit here is the original project's commit, and the
 follow-up work is added on top of it.
 
+> **Next in the series:** part 3,
+> [arabidopsis-visium-hd-atlas](https://github.com/DrSeed/arabidopsis-visium-hd-atlas), checks the
+> tissue labels against a published single-nucleus atlas.
+> [arabidopsis-visium-hd-series](https://github.com/DrSeed/arabidopsis-visium-hd-series) compares
+> all three parts.
+
 **➡ Read the new analyses: [follow_up_analyses.md](follow_up_analyses.md)**
 (source: [follow_up_analyses.Rmd](follow_up_analyses.Rmd))
 
